@@ -16,7 +16,7 @@ namespace Agency.Controllers
     {
         AgencyDbContext db = new AgencyDbContext();
 
-        // GET: ReservationDetail
+        // GET: ReservationDetail 
         public ActionResult Index(int? id)
         {
             if (Request.IsAjaxRequest())
