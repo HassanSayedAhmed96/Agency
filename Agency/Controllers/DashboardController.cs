@@ -19,6 +19,27 @@ namespace Agency.Controllers
         // GET: Dashboard
         public ActionResult Index()
         {
+            User currentUser = Session["user"] as User;
+            UserViewModel userData = (from user in db.Users
+                                      select new UserViewModel
+                                      {
+                                          id = user.id,
+                                          user_name = user.user_name,
+                                          full_name = user.full_name,
+                                          password = user.password,
+                                          type = user.type,
+                                          phone1 = user.phone1,
+                                          phone2 = user.phone2,
+                                          imagePath = user.image,
+                                          address1 = user.address1,
+                                          address2 = user.address2,
+                                          birthDate = user.birthDate,
+                                          code = user.code,
+                                          email = user.email,
+                                          gender = user.gender,
+                                          active = user.active,
+                                      }).Where(u => u.id == currentUser.id).FirstOrDefault();
+
             var topSelling = (from hotel in db.Hotels
                               join eventHotel in db.EventHotels on hotel.id equals eventHotel.hotel_id
                               join res in db.Reservations on eventHotel.id equals res.event_hotel_id
@@ -35,6 +56,7 @@ namespace Agency.Controllers
             SqlConnection sql = new SqlConnection(cs);
             sql.Open();
 
+            //Top Selling Hotels by Nights
             SqlCommand comm = new SqlCommand(@"select top 10 sum(total_nights) as total_nights, Hotels.name as hotel_name, Cities.name as city_name, Hotels.rate,(select top 1 HotelImages.path from HotelImages where HotelImages.hotel_id = Hotels.id) as hotel_image
 											from Reservations 
                                             join EventHotels on Reservations.event_hotel_id = EventHotels.id
@@ -54,6 +76,26 @@ namespace Agency.Controllers
                 });
             }
             reader.Close();
+
+            //Latest Messages
+            comm = new SqlCommand(@"select top 5 orginalChats.from_user,users.full_name,users.image, (select top 1 message from Chats where from_user = orginalChats.from_user order by created_at desc) as latest_message
+                                    from chats as orginalChats
+                                    inner join users on orginalChats.from_user = users.id
+                                    where orginalChats.to_user = 1
+                                    group by orginalChats.from_user,users.full_name,users.image", sql);
+            reader = comm.ExecuteReader();
+            List<ChatViewModel> LatestChats = new List<ChatViewModel>();
+
+            while (reader.Read())
+            {
+                LatestChats.Add(new ChatViewModel
+                {
+                    strings_from_user = reader["full_name"].ToString(),
+                    message = reader["latest_message"].ToString(),
+                    image = reader["image"].ToString()
+                });
+            }
+            reader.Close();
             List<ReservationLogViewModel> reservationLog = (from resLog in db.ReservationLogs
                                                    join user in db.Users on resLog.user_id equals user.id
                                                    select new ReservationLogViewModel
@@ -66,6 +108,8 @@ namespace Agency.Controllers
             DashboardViewModel dashboardViewModel = new DashboardViewModel();
             dashboardViewModel.topSellingHotels = hotels;
             dashboardViewModel.logs = reservationLog;
+            dashboardViewModel.userData = userData;
+            dashboardViewModel.LatestChats = LatestChats;
             return View(dashboardViewModel);
         }
 
@@ -91,18 +135,58 @@ namespace Agency.Controllers
                 xAxis.Add(reader["date"].ToString());
             }
             reader.Close();
-            double total_amount_after_tax = (double)(db.Reservations.Select(p => p.total_amount_after_tax).Sum());
-            double total_amount_from_vendor = (double)(db.Reservations.Select(p => p.total_amount_from_vendor).Sum());
-            double paid_amount = (double)(db.Reservations.Select(p => p.paid_amount).Sum());
+            List<double?> total_amount_after_tax_reservations = db.Reservations.Select(p => p.total_amount_after_tax).ToList();
+            double? total_amount_after_tax = 0;
+            if (total_amount_after_tax_reservations != null)
+            {
+                total_amount_after_tax = total_amount_after_tax_reservations.Sum();
+            }
+
+            List<double?> total_amount_from_vendor_reservations = db.Reservations.Select(p => p.total_amount_from_vendor).ToList();
+            double? total_amount_from_vendor = 0;
+            if (total_amount_from_vendor_reservations != null)
+            {
+                total_amount_from_vendor = total_amount_from_vendor_reservations.Sum();
+            }
+
+            List<double?> paid_amount_reservations = db.Reservations.Select(p => p.paid_amount).ToList();
+            double? paid_amount = 0;
+            if (paid_amount_reservations != null)
+            {
+                paid_amount = paid_amount_reservations.Sum();
+            }
+
+            List<double?> total_amount_from_vendor_finished_reservations = db.Reservations.Where(p => p.paid_amount == p.total_amount_after_tax).Select(p => p.total_amount_from_vendor).ToList();
+            double? total_amount_from_vendor_finished = 0;
+            if (total_amount_from_vendor_finished_reservations != null)
+            {
+                total_amount_from_vendor_finished = total_amount_from_vendor_finished_reservations.Sum();
+            }
 
 
-            double profit = total_amount_after_tax - total_amount_from_vendor;
-            double collected = paid_amount;
-            double balance = total_amount_after_tax - paid_amount;
+            List<double?> ttotal_amount_after_tax_finished_reservations = db.Reservations.Where(p => p.paid_amount == p.total_amount_after_tax).Select(p => p.total_amount_after_tax).ToList();
+            double? total_amount_after_tax_finished = 0;
+            if (total_amount_from_vendor_finished_reservations != null)
+            {
+                total_amount_after_tax_finished = ttotal_amount_after_tax_finished_reservations.Sum();
+            }
+
+
+            double? profit = total_amount_after_tax - total_amount_from_vendor;
+            double? actualProfit = total_amount_after_tax_finished - total_amount_from_vendor_finished;
+
+            double? collected = paid_amount;
+            double? balance = total_amount_after_tax - paid_amount;
             
-            double profitPercentage = (profit / total_amount_after_tax) * 100;
-            double collectedPercentage = (collected / total_amount_after_tax) * 100;
-            double balancePercentage = (balance / total_amount_after_tax) * 100;
+            double? profitPercentage = (profit / total_amount_after_tax) * 100;
+            double? actualProfitPercentage = 0;
+            if(actualProfit != 0 && total_amount_after_tax_finished != 0)
+            {
+                actualProfitPercentage = (actualProfit / total_amount_after_tax_finished) * 100;
+            }
+
+            double? collectedPercentage = (collected / total_amount_after_tax) * 100;
+            double? balancePercentage = (balance / total_amount_after_tax) * 100;
 
             return Json(new { 
                 xAxis = xAxis,
@@ -110,9 +194,11 @@ namespace Agency.Controllers
                 yAxisBalance = yAxisBalance,
                 yAxisProfit = yAxisProfit,
                 profit = profit,
+                actualProfit = actualProfit,
                 collected = collected,
                 balance = balance,
                 profitPercentage = profitPercentage,
+                actualProfitPercentage = actualProfitPercentage,
                 collectedPercentage = collectedPercentage,
                 balancePercentage = balancePercentage
            }, JsonRequestBehavior.AllowGet);

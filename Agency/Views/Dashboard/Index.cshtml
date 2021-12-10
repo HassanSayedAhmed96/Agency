@@ -114,7 +114,25 @@
                                 </div>
 
                             </div>
+                            <div class="summary-list summary-expenses">
 
+                                <div class="summery-info">
+
+                                    <div class="w-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-credit-card"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                                    </div>
+                                    <div class="w-summary-details">
+
+                                        <div class="w-summary-info">
+                                            <h6>Actual Profit <span class="summary-count" id="actualProfitCard"></span></h6>
+                                            <p class="summary-average" id="actualProfitPercentage">%</p>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
                         </div>
 
                     </div>
@@ -301,15 +319,15 @@
                             <div class="widget-profile">
 
                                 <div class="w-profile-view">
-                                    <img src="~/Content/AdminPanelAssets/assets/img/90x90.jpg" alt="admin-profile" class="img-fluid">
+                                    <img src="@Model.userData.imagePath" alt="admin-profile" class="img-fluid">
                                     <div class="w-profile-content">
-                                        <h6>Alan Green</h6>
-                                        <p>Lead Developer</p>
+                                        <h6>@Model.userData.full_name</h6>
+                                        <p>@Model.userData.email</p>
                                     </div>
                                 </div>
 
                                 <div class="w-profile-links">
-                                    <a href="user_profile.html" class="w-p-link">
+                                    <a href="@Url.Action("Profile","User")" class="w-p-link">
                                         <i class="far fa-user"></i>
                                         <p>My Profile</p>
                                     </a>
@@ -342,79 +360,18 @@
                                 </div>
 
                                 <div class="widget-messages">
-                                    <a href="apps_chat.html" class="w-message">
-                                        <img src="~/Content/AdminPanelAssets/assets/img/90x90.jpg" alt="" class="img-fluid">
-                                        <div class="msg-content">
-                                            <h5 class="w-msg-username">Andy King</h5>
-                                            <p class="w-msg-text">Work is delayed</p>
-                                        </div>
-                                    </a>
-
-                                    <a href="apps_chat.html" class="w-message">
-                                        <img src="~/Content/AdminPanelAssets/assets/img/90x90.jpg" alt="" class="img-fluid">
-                                        <div class="msg-content">
-                                            <h5 class="w-msg-username">Alma Clark</h5>
-                                            <p class="w-msg-text">It was a bit dramatic.</p>
-                                        </div>
-                                    </a>
-
-                                    <a href="apps_chat.html" class="w-message">
-                                        <img src="~/Content/AdminPanelAssets/assets/img/90x90.jpg" alt="" class="img-fluid">
-                                        <div class="msg-content">
-                                            <h5 class="w-msg-username">Vincent</h5>
-                                            <p class="w-msg-text">Coffee?</p>
-                                        </div>
-                                    </a>
-
-                                    <a href="apps_chat.html" class="w-message">
-                                        <img src="~/Content/AdminPanelAssets/assets/img/90x90.jpg" alt="" class="img-fluid">
-                                        <div class="msg-content">
-                                            <h5 class="w-msg-username">Iris Hofman</h5>
-                                            <p class="w-msg-text">Not comming to office today.</p>
-                                        </div>
-                                    </a>
-
-                                    <a href="apps_chat.html" class="w-message">
-                                        <img src="~/Content/AdminPanelAssets/assets/img/90x90.jpg" alt="" class="img-fluid">
-                                        <div class="msg-content">
-                                            <h5 class="w-msg-username">Linda Nelson</h5>
-                                            <p class="w-msg-text">Uploaded files to server.</p>
-                                        </div>
-                                    </a>
+                                    @foreach(var chat in Model.LatestChats)
+                                    {
+                                        <a href="@Url.Action("Index","Chat")" class="w-message">
+                                            <img src="@chat.image" alt="" class="img-fluid">
+                                            <div class="msg-content">
+                                                <h5 class="w-msg-username">@chat.strings_from_user</h5>
+                                                <p class="w-msg-text">@chat.message</p>
+                                            </div>
+                                        </a>
+                                    }
                                 </div>
                             </div>
-
-                            <div class="widget-invoice">
-                                <div class="widget-title">
-                                    <h5>New Invoice</h5>
-                                    <a href="apps_invoice.html">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-shopping-bag"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                                    </a>
-                                </div>
-
-                                <div class="widget-invoice-lists">
-                                    <div class="w-invoice">
-                                        <p class="w-inv-text"><a href="apps_invoice.html"><span class="inv-number">#002658</span></a> is generated for <span class="usr-name">Laurie Fox</span></p>
-                                    </div>
-
-                                    <div class="w-invoice">
-                                        <p class="w-inv-text"><a href="apps_invoice.html"><span class="inv-number">#0036489</span></a> is generated for <span class="usr-name">Ernest Reeves</span></p>
-                                    </div>
-
-                                    <div class="w-invoice">
-                                        <p class="w-inv-text"><a href="apps_invoice.html"><span class="inv-number">#014778</span></a> is generated for <span class="usr-name">Sean Freeman</span></p>
-                                    </div>
-
-                                    <div class="w-invoice">
-                                        <p class="w-inv-text"><a href="apps_invoice.html"><span class="inv-number">#0165987</span></a> is generated for <span class="usr-name">Nia Hillyer</span></p>
-                                    </div>
-
-                                    <div class="w-invoice">
-                                        <p class="w-inv-text"><a href="apps_invoice.html"><span class="inv-number">#0265998</span></a> is generated for <span class="usr-name">Dale Butler</span></p>
-                                    </div>
-                                </div>
-                            </div>
-
 
                             <div class="widget-taskBoard">
                                 <div class="widget-title">
@@ -523,13 +480,17 @@
             contentType: "application/json; charset=utf-8",
             datatype: "json",
             success: function (data) {
+                console.log(data);
                 $("#collectedCard").text(addCommas(data.collected.toFixed(2)));
                 $("#balanceCard").text(addCommas(data.balance.toFixed(2)));
                 $("#profitCard").text(addCommas(data.profit.toFixed(2)));
+                $("#actualProfitCard").text(addCommas(data.actualProfit.toFixed(2)));
+                
                 //percentage
                 $("#collectedPercentage").text(addCommas(data.collectedPercentage.toFixed(2))+'%');
                 $("#balancePercentage").text(addCommas(data.balancePercentage.toFixed(2)) + '%');
                 $("#profitPercentage").text(addCommas(data.profitPercentage.toFixed(2)) + '%');
+                $("#actualProfitPercentage").text(addCommas(data.actualProfitPercentage.toFixed(2)) + '%');
 
                     var options1 = {
                         chart: {

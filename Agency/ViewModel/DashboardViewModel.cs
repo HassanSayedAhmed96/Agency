@@ -9,5 +9,7 @@ namespace Agency.ViewModel
     {
         public List<HotelViewModel> topSellingHotels { get; set; }
         public List<ReservationLogViewModel> logs { get; set; }
+        public UserViewModel userData { get; set; }
+        public List<ChatViewModel> LatestChats { get; set; }
     }
 }
